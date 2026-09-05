@@ -1,0 +1,88 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root,
+[data-theme="light"] {
+  --bg: 38 50% 97%;
+  --surface: 36 40% 99%;
+  --surface-2: 36 33% 98%;
+  --offset: 34 35% 94%;
+  --border: 32 18% 84%;
+  --divider: 32 12% 90%;
+  --text: 22 30% 16%;
+  --muted: 24 8% 42%;
+  --faint: 28 8% 62%;
+  --primary: 16 74% 48%;
+  --primary-hover: 14 70% 42%;
+  --primary-soft: 18 80% 94%;
+  --success: 100 45% 34%;
+  --success-soft: 95 40% 93%;
+  --warning: 32 85% 48%;
+  --warning-soft: 38 80% 94%;
+  --danger: 4 72% 46%;
+  --danger-soft: 6 70% 95%;
+  --radius: 0.75rem;
+}
+
+[data-theme="dark"] {
+  --bg: 28 12% 9%;
+  --surface: 28 9% 12%;
+  --surface-2: 28 8% 14%;
+  --offset: 28 8% 16%;
+  --border: 28 6% 24%;
+  --divider: 28 6% 20%;
+  --text: 34 12% 88%;
+  --muted: 32 6% 64%;
+  --faint: 32 6% 48%;
+  --primary: 16 82% 62%;
+  --primary-hover: 16 80% 68%;
+  --primary-soft: 16 40% 18%;
+  --success: 100 40% 52%;
+  --success-soft: 100 30% 16%;
+  --warning: 32 85% 60%;
+  --warning-soft: 32 40% 16%;
+  --danger: 4 72% 60%;
+  --danger-soft: 4 40% 16%;
+  --radius: 0.75rem;
+}
+
+* { box-sizing: border-box; }
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  scroll-behavior: smooth;
+}
+body {
+  min-height: 100dvh;
+  line-height: 1.55;
+  background: hsl(var(--bg));
+  color: hsl(var(--text));
+  font-family: var(--font-body), system-ui, sans-serif;
+}
+button { cursor: pointer; }
+input, textarea, select { font: inherit; color: inherit; }
+::selection { background: hsl(var(--primary) / 0.2); }
+
+:focus-visible {
+  outline: 2px solid hsl(var(--primary));
+  outline-offset: 2px;
+}
+
+@keyframes pop {
+  0% { transform: scale(0.96); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+.animate-pop { animation: pop 160ms cubic-bezier(0.16, 1, 0.3, 1); }
+
+@keyframes fadein {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fadein { animation: fadein 200ms ease-out; }
+
+/* scrollbar discrète */
+.thin-scroll::-webkit-scrollbar { height: 8px; width: 8px; }
+.thin-scroll::-webkit-scrollbar-thumb { background: hsl(var(--border)); border-radius: 99px; }
+.thin-scroll::-webkit-scrollbar-track { background: transparent; }
