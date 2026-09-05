@@ -11,7 +11,19 @@ try { const raw=storageGet("repas-garde-demo"); if(raw) demo={...demo,...JSON.pa
 function persist(){ storageSet("repas-garde-demo", JSON.stringify(demo)); }
 type Listener=()=>void; const listeners=new Set<Listener>(); function emit(){persist(); listeners.forEach(l=>l());}
 export function genInviteCode(){const chars="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";return Array.from({length:6},()=>chars[Math.floor(Math.random()*chars.length)]).join("");}
-export async function createHousehold(name:string){const household={id:uid(),name,invite_code:genInviteCode()};const member:Member={id:uid(),household_id:household.id,name:"Toi",role:"gardienne",created_at:now(),profile_color:"#7c3aed",restrictions:""};if(IS_DEMO){demo.households[household.id]=household;demo.members[member.id]=member;emit();}else{const sb=getSupabase()!;await sb.from("households").insert(household);await sb.from("members").insert(member);}return {household,member};}
+// L'application est personnelle pour le moment : un seul espace partagé, sans création/jonction de foyers.
+export async function createHousehold(name:string){
+  if(IS_DEMO){
+    const existing=Object.values(demo.households)[0];
+    if(existing){const member:Member={id:uid(),household_id:existing.id,name:"Toi",role:"gardienne",created_at:now(),profile_color:"#7c3aed",restrictions:""};demo.members[member.id]=member;emit();return {household:existing,member};}
+    const household={id:uid(),name,invite_code:genInviteCode()};const member:Member={id:uid(),household_id:household.id,name:"Toi",role:"gardienne",created_at:now(),profile_color:"#7c3aed",restrictions:""};demo.households[household.id]=household;demo.members[member.id]=member;emit();return {household,member};
+  }
+  const sb=getSupabase()!; const {data:existing}=await sb.from("households").select("*").order("created_at",{ascending:true}).limit(1).maybeSingle();
+  const household=existing as Household ?? {id:uid(),name,invite_code:genInviteCode()};
+  if(!existing) await sb.from("households").insert(household);
+  const member:Member={id:uid(),household_id:household.id,name:"Toi",role:"gardienne",created_at:now(),profile_color:"#7c3aed",restrictions:""};
+  await sb.from("members").insert(member); return {household,member};
+}
 export async function joinHousehold(code:string,name:string,role:Member["role"]){if(IS_DEMO){let h=Object.values(demo.households).find(x=>x.invite_code===code.toUpperCase());if(!h){h={id:uid(),name:`Foyer ${code.toUpperCase()}`,invite_code:code.toUpperCase()};demo.households[h.id]=h;}const member:Member={id:uid(),household_id:h.id,name,role,created_at:now(),profile_color:"#2563eb",restrictions:""};demo.members[member.id]=member;emit();return {household:h,member};}const sb=getSupabase()!;const {data:h}=await sb.from("households").select("*").eq("invite_code",code.toUpperCase()).maybeSingle();if(!h)return null;const member:Member={id:uid(),household_id:h.id,name,role,created_at:now(),profile_color:"#2563eb",restrictions:""};await sb.from("members").insert(member);return {household:h as Household,member};}
 export async function getHousehold(id:string){if(IS_DEMO)return demo.households[id]??null;const {data}=await getSupabase()!.from("households").select("*").eq("id",id).maybeSingle();return data as Household|null;}
 export async function getMembers(id:string){if(IS_DEMO)return Object.values(demo.members).filter(m=>m.household_id===id);const {data}=await getSupabase()!.from("members").select("*").eq("household_id",id).order("created_at");return (data as Member[])??[];}
